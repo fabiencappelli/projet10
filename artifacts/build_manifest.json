@@ -1,0 +1,13 @@
+{
+  "built_at": 1759010297,
+  "articles": 364012,
+  "embedding_dim": 52,
+  "users": 322897,
+  "half_life_days": 30,
+  "alpha_recency": 0.6,
+  "topk_cold": 5,
+  "pca_enabled": true,
+  "pca_variance_target": null,
+  "pca_n_components": 52,
+  "normalized_l2": true
+}
