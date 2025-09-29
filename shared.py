@@ -1,7 +1,10 @@
 import json, numpy as np
 from pathlib import Path
+import os
 
-DATA = Path("artifacts")
+BASE = Path(os.environ.get("AzureWebJobsScriptRoot", Path(__file__).resolve().parent))
+DATA = BASE / "artifacts"
+
 E = np.load(DATA / "embeddings_clean.npy").astype("float32")
 P = np.load(DATA / "user_profiles.npy").astype("float32")
 id2row = json.loads((DATA / "id_to_row.json").read_text())
