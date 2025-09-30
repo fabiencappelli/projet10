@@ -1,0 +1,83 @@
+name: Deploy Function + Streamlit (smart)
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "**.py"
+      - "requirements.txt"
+      - "host.json"
+      - ".funcignore"
+      - "streamlit_app/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      functions_changed: ${{ steps.filter.outputs.functions_changed }}
+      streamlit_changed: ${{ steps.filter.outputs.streamlit_changed }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Filter paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            functions_changed:
+              - 'function_app.py'
+              - 'recommender.py'
+              - 'shared.py'
+              - 'host.json'
+              - 'requirements.txt'
+              - '.funcignore'
+            streamlit_changed:
+              - 'streamlit_app/**'
+
+  deploy-functions:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.functions_changed == 'true'
+    runs-on: ubuntu-latest
+    env:
+      AZURE_FUNCTIONAPP_NAME: recoprojet10 # ← nom exact de ta Function App
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install deps (optional build check)
+        run: |
+          python -m pip install -U pip
+          pip install -r requirements.txt
+
+      - name: Deploy Azure Function
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+          package: .
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+
+  deploy-streamlit:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.streamlit_changed == 'true'
+    runs-on: ubuntu-latest
+    env:
+      AZURE_WEBAPP_NAME: reco-streamlit-portal # ← remplace par le nom de TA Web App
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Zip streamlit app
+        run: |
+          cd streamlit_app
+          zip -r ../streamlit.zip .
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          package: streamlit.zip
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
