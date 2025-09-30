@@ -1,4 +1,6 @@
-import os, requests, streamlit as st
+import os
+import requests
+import streamlit as st
 
 API_BASE = os.getenv("RECO_API_URL", "https://recoprojet10.azurewebsites.net")
 SECRET = os.getenv("AZ_RECO_SECRET")
