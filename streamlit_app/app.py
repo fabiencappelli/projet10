@@ -10,7 +10,7 @@ st.title("📰 Recommandations d'articles")
 
 with st.form("reco_form"):
     user_id = st.text_input("ID utilisateur", value="12345")
-    k = st.number_input("Nombre d'articles", min_value=1, max_value=20, value=5, step=1)
+    k = st.number_input("Nombre d'articles", min_value=1, max_value=5, value=5, step=1)
     submitted = st.form_submit_button("Obtenir des recommandations")
 
 if submitted:
